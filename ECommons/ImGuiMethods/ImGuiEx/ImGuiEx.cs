@@ -66,7 +66,7 @@ public static unsafe partial class ImGuiEx
         {
             if(ImGui.IsWindowAppearing() && options?.Contains(JobSelectorOption.ClearFilterOnOpen) == true)
             ImGuiEx.SetNextItemWidthScaled(150f);
-            ImGui.InputTextWithHint("##filter", "Filter...", ref JobSelectorFilter, 50);
+            ImGui.InputTextWithHint("##filter", "筛选...", ref JobSelectorFilter, 50);
             foreach (var cond in Enum.GetValues<Job>().Where(x => baseJobs || !x.IsUpgradeable()).OrderByDescending(x => Svc.Data.GetExcelSheet<ClassJob>().GetRow((uint)x).Role))
             {
                 if (cond == Job.ADV) continue;
@@ -633,8 +633,7 @@ public static unsafe partial class ImGuiEx
 
     public static float Scale(this float f)
     {
-        // Dalamud global scale and font size are now indepedent from each other, so both need to factored in.
-        return f * ImGuiHelpers.GlobalScale * (ImGui.GetFontSize() / 12f);
+        return f * ImGuiHelpers.GlobalScale;
     }
 
     public static void SetTooltip(string text)
@@ -955,7 +954,7 @@ public static unsafe partial class ImGuiEx
                 if (!EnumComboSearch.ContainsKey(name)) EnumComboSearch.Add(name, new(""));
                 fltr = EnumComboSearch[name];
                 ImGuiEx.SetNextItemFullWidth();
-                ImGui.InputTextWithHint($"##{name.Replace("#", "_")}", "Filter...", ref fltr.Value, 50);
+                ImGui.InputTextWithHint($"##{name.Replace("#", "_")}", "筛选...", ref fltr.Value, 50);
             }
             foreach (var x in values)
             {
@@ -1010,7 +1009,7 @@ public static unsafe partial class ImGuiEx
                 if (!ComboSearch.ContainsKey(name)) ComboSearch.Add(name, new(""));
                 fltr = ComboSearch[name];
                 ImGuiEx.SetNextItemFullWidth();
-                ImGui.InputTextWithHint($"##{name}fltr", "Filter...", ref fltr.Value, 50);
+                ImGui.InputTextWithHint($"##{name}fltr", "筛选...", ref fltr.Value, 50);
             }
             foreach (var x in values)
             {
