@@ -88,7 +88,7 @@ public class InternalLog
         }
         ImGui.SameLine();
         ImGuiEx.SetNextItemFullWidth();
-        ImGui.InputTextWithHint("##Filter", "Filter...", ref Search, 100);
+        ImGui.InputTextWithHint("##Filter", "筛选...", ref Search, 100);
         ImGui.BeginChild($"Plugin_log{DalamudReflector.GetPluginName()}");
         foreach(var x in Messages)
         {

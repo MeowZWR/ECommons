@@ -137,7 +137,7 @@ public unsafe class TerritorySelector : Window
                 if (ImGui.BeginTabItem(x.Key))
                 {
                     ImGui.SetNextItemWidth(200f);
-                    ImGui.InputTextWithHint($"##search", "Filter...", ref Filter, 50);
+                    ImGui.InputTextWithHint($"##search", "筛选...", ref Filter, 50);
                     ImGui.SameLine();
                     ImGui.Checkbox("Only selected", ref OnlySelected);
                     if (Player.Available)
