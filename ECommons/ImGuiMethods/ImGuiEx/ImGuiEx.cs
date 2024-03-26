@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Net;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -782,13 +781,6 @@ public static unsafe partial class ImGuiEx
         ImGui.TextUnformatted(s);
     }
 
-    public static void Text(ImFontPtr font, string s)
-    {
-        ImGui.PushFont(font);
-        ImGui.TextUnformatted(s);
-        ImGui.PopFont();
-    }
-
     public static void Text(Vector4 col, string s)
     {
         ImGui.PushStyleColor(ImGuiCol.Text, col);
@@ -796,29 +788,11 @@ public static unsafe partial class ImGuiEx
         ImGui.PopStyleColor();
     }
 
-    public static void Text(Vector4 col, ImFontPtr font, string s)
-    {
-        ImGui.PushFont(font);
-        ImGui.PushStyleColor(ImGuiCol.Text, col);
-        ImGui.TextUnformatted(s);
-        ImGui.PopStyleColor();
-        ImGui.PopFont();
-    }
-
     public static void Text(uint col, string s)
     {
         ImGui.PushStyleColor(ImGuiCol.Text, col);
         ImGui.TextUnformatted(s);
         ImGui.PopStyleColor();
-    }
-
-    public static void Text(uint col, ImFontPtr font, string s)
-    {
-        ImGui.PushFont(font);
-        ImGui.PushStyleColor(ImGuiCol.Text, col);
-        ImGui.TextUnformatted(s);
-        ImGui.PopStyleColor();
-        ImGui.PopFont();
     }
 
     public static void TextWrapped(string s)
@@ -879,8 +853,8 @@ public static unsafe partial class ImGuiEx
     }
 
     public static void EzTabBar(string id, params (string name, Action function, Vector4? color, bool child)[] tabs) => EzTabBar(id, false, tabs);
-    public static void EzTabBar(string id, bool KoFiTransparent, params (string name, Action function, Vector4? color, bool child)[] tabs) => EzTabBar(id, KoFiTransparent, null, tabs);
-    public static void EzTabBar(string id, bool KoFiTransparent, string openTabName, params (string name, Action function, Vector4? color, bool child)[] tabs)
+
+    public static void EzTabBar(string id, bool KoFiTransparent, params (string name, Action function, Vector4? color, bool child)[] tabs)
     {
         ImGui.BeginTabBar(id);
         foreach (var x in tabs)
@@ -890,7 +864,7 @@ public static unsafe partial class ImGuiEx
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, x.color.Value);
             }
-            if (ImGuiEx.BeginTabItem(x.name, openTabName == x.name?ImGuiTabItemFlags.SetSelected:ImGuiTabItemFlags.None))
+            if (ImGui.BeginTabItem(x.name))
             {
                 if (x.color != null)
                 {
@@ -1047,17 +1021,20 @@ public static unsafe partial class ImGuiEx
     public static bool Alt => ImGui.GetIO().KeyAlt;
     public static bool Shift => ImGui.GetIO().KeyShift;
 
-    public static bool IconButton(FontAwesomeIcon icon, string id = "ECommonsButton", Vector2 size = default, bool enabled = true)
+    public static bool IconButton(FontAwesome.FontAwesomeString icon, string id = "ECommonsButton", Vector2 size = default)
     {
-        return IconButton(icon.ToIconString(), id, size, enabled);
+        return IconButton((string)icon, id, size);
     }
 
-    public static bool IconButton(string icon, string id = "ECommonsButton", Vector2 size = default, bool enabled = true)
+    public static bool IconButton(FontAwesomeIcon icon, string id = "ECommonsButton", Vector2 size = default)
+    {
+        return IconButton(icon.ToIconString(), id, size);
+    }
+
+    public static bool IconButton(string icon, string id = "ECommonsButton", Vector2 size = default)
     {
         ImGui.PushFont(UiBuilder.IconFont);
-        if (!enabled) ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.6f);
-        var result = ImGui.Button($"{icon}##{icon}-{id}", size) && enabled;
-        if (!enabled) ImGui.PopStyleVar();
+        var result = ImGui.Button($"{icon}##{icon}-{id}", size);
         ImGui.PopFont();
         return result;
     }

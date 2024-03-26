@@ -2,7 +2,6 @@ using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using Lumina.Excel.GeneratedSheets;
 using System;
-using System.Collections;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -61,11 +60,6 @@ public static class ExcelWorldHelper
     public static WorldDCGroupType[] GetDataCenters(Region? region = null)
     {
         return Svc.Data.GetExcelSheet<WorldDCGroupType>().Where(x => region == null || (Region)x.Region == region.Value).ToArray();
-    }
-
-    public static WorldDCGroupType[] GetDataCenters(System.Collections.Generic.IEnumerable<Region> regions)
-    {
-        return Svc.Data.GetExcelSheet<WorldDCGroupType>().Where(x => regions.Contains((Region)x.Region)).ToArray();
     }
 
     [Obsolete("Please use Get")]
