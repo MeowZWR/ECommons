@@ -18,13 +18,13 @@ public unsafe class TerritorySelector : Window
     public static bool Singleton = true;
     public static Dictionary<string, TerritoryIntendedUseEnum[]> Categories = new()
     {
-        ["World"] = [TerritoryIntendedUseEnum.City_Area, TerritoryIntendedUseEnum.Open_World,],
-        ["Housing"] = [TerritoryIntendedUseEnum.Housing_Instances, TerritoryIntendedUseEnum.Residential_Area,],
-        ["Inn"] = [TerritoryIntendedUseEnum.Inn,],
-        ["Dungeon"] = [TerritoryIntendedUseEnum.Dungeon, TerritoryIntendedUseEnum.Variant_Dungeon, TerritoryIntendedUseEnum.Criterion_Duty, TerritoryIntendedUseEnum.Criterion_Savage_Duty,],
-        ["Raid"] = [TerritoryIntendedUseEnum.Raid, TerritoryIntendedUseEnum.Raid_2, TerritoryIntendedUseEnum.Alliance_Raid, TerritoryIntendedUseEnum.Large_Scale_Raid, TerritoryIntendedUseEnum.Large_Scale_Savage_Raid,],
-        ["Trial"] = [TerritoryIntendedUseEnum.Trial],
-        ["Deep Dungeon"] = [TerritoryIntendedUseEnum.Deep_Dungeon],
+        ["世界"] = [TerritoryIntendedUseEnum.City_Area, TerritoryIntendedUseEnum.Open_World,],
+        ["住宅"] = [TerritoryIntendedUseEnum.Housing_Instances, TerritoryIntendedUseEnum.Residential_Area,],
+        ["旅店"] = [TerritoryIntendedUseEnum.Inn,],
+        ["迷宫挑战"] = [TerritoryIntendedUseEnum.Dungeon, TerritoryIntendedUseEnum.Variant_Dungeon, TerritoryIntendedUseEnum.Criterion_Duty, TerritoryIntendedUseEnum.Criterion_Savage_Duty,],
+        ["大型任务"] = [TerritoryIntendedUseEnum.Raid, TerritoryIntendedUseEnum.Raid_2, TerritoryIntendedUseEnum.Alliance_Raid, TerritoryIntendedUseEnum.Large_Scale_Raid, TerritoryIntendedUseEnum.Large_Scale_Savage_Raid,],
+        ["讨伐歼灭战"] = [TerritoryIntendedUseEnum.Trial],
+        ["深层迷宫"] = [TerritoryIntendedUseEnum.Deep_Dungeon],
     };
     public static readonly List<TerritorySelector> Selectors = [];
     private readonly Dictionary<string, List<TerritoryType>> Cache = [];
@@ -66,7 +66,7 @@ public unsafe class TerritorySelector : Window
 
     private void Setup(HashSet<uint> SelectedTerritories, Action<TerritorySelector, HashSet<uint>> Callback, Action<TerritorySelector, uint> CallbackSingle)
     {
-        WindowName ??= "Select zones";
+        WindowName ??= "选择区域";
         IsSingleSelection = CallbackSingle != null;
         SelectedTerritory = SelectedTerritories.FirstOrDefault();
         if(Singleton)
@@ -78,7 +78,7 @@ public unsafe class TerritorySelector : Window
         {
             if(Selectors.Any(x => x.WindowName == WindowName))
             {
-                Notify.Error("Territory selector is already open");
+                Notify.Error("区域选择器已打开");
                 return;
             }
         }
@@ -107,20 +107,20 @@ public unsafe class TerritorySelector : Window
                 }
             }
         }
-        Cache["Other"] = [];
+        Cache["其他"] = [];
         foreach(var x in Svc.Data.GetExcelSheet<TerritoryType>())
         {
             if(!Cache.Values.Any(c => c.Any(z => z.RowId == x.RowId)) && x.PlaceName.Value.Name?.ExtractText().IsNullOrEmpty() == false)
             {
-                Cache["Other"].Add(x);
+                Cache["其他"].Add(x);
             }
         }
-        Cache["All"] = [];
+        Cache["全部"] = [];
         foreach(var x in Svc.Data.GetExcelSheet<TerritoryType>())
         {
             if(x.PlaceName.Value?.Name.ExtractText().IsNullOrEmpty() == false)
             {
-                Cache["All"].Add(x);
+                Cache["全部"].Add(x);
             }
         }
     }
@@ -135,15 +135,15 @@ public unsafe class TerritorySelector : Window
                 if(ImGui.BeginTabItem(x.Key))
                 {
                     ImGui.SetNextItemWidth(200f);
-                    ImGui.InputTextWithHint($"##search", "Filter...", ref Filter, 50);
+                    ImGui.InputTextWithHint($"##search", "筛选...", ref Filter, 50);
                     ImGui.SameLine();
-                    ImGui.Checkbox("Only selected", ref OnlySelected);
+                    ImGui.Checkbox("仅显示已选择项", ref OnlySelected);
                     if(Player.Available)
                     {
                         ImGui.SameLine();
                         if(!IsSingleSelection)
                         {
-                            if(ImGuiEx.CollectionCheckbox($"Current: {ExcelTerritoryHelper.GetName(Svc.ClientState.TerritoryType)}", Svc.ClientState.TerritoryType, SelectedTerritories))
+                            if(ImGuiEx.CollectionCheckbox($"当前：{ExcelTerritoryHelper.GetName(Svc.ClientState.TerritoryType)}", Svc.ClientState.TerritoryType, SelectedTerritories))
                             {
                                 try
                                 {
@@ -155,12 +155,12 @@ public unsafe class TerritorySelector : Window
                                 }
                             }
                             ImGui.SameLine();
-                            if(ImGui.Button("Add all visible"))
+                            if(ImGui.Button("添加所有可见项"))
                             {
                                 VisibleAction = true;
                             }
                             ImGui.SameLine();
-                            if(ImGui.Button("Remove all visible"))
+                            if(ImGui.Button("移除所有可见项"))
                             {
                                 VisibleAction = false;
                             }
@@ -188,11 +188,11 @@ public unsafe class TerritorySelector : Window
                         {
                             ImGui.TableSetupColumn(" ");
                             ImGui.TableSetupColumn("ID");
-                            ImGui.TableSetupColumn("Place Name", ImGuiTableColumnFlags.WidthStretch);
-                            ImGui.TableSetupColumn("Duty");
-                            ImGui.TableSetupColumn("Zone");
-                            ImGui.TableSetupColumn("Region");
-                            ImGui.TableSetupColumn("Intended use");
+                            ImGui.TableSetupColumn("地名", ImGuiTableColumnFlags.WidthStretch);
+                            ImGui.TableSetupColumn("任务");
+                            ImGui.TableSetupColumn("地区");
+                            ImGui.TableSetupColumn("地域");
+                            ImGui.TableSetupColumn("预期用途");
 
                             ImGui.TableHeadersRow();
 
