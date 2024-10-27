@@ -15,7 +15,7 @@ public class InternalLog
 {
     public static readonly CircularBuffer<InternalLogMessage> Messages = new(1000);
 
-    public static (string, Action, Vector4, bool) ImGuiTab(bool draw = true) => (draw ? "Log" : null, PrintImgui, ImGuiColors.DalamudGrey, false);
+    public static (string, Action, Vector4, bool) ImGuiTab(bool draw = true) => (draw ? "日志" : null, PrintImgui, ImGuiColors.DalamudGrey, false);
 
     public static void Information(string s)
     {
@@ -89,25 +89,25 @@ public class InternalLog
     public static void PrintImgui()
     {
         ImGui.Checkbox("##Autoscroll", ref Autoscroll);
-        ImGuiEx.Tooltip("Autoscroll");
+        ImGuiEx.Tooltip("自动滚动");
         ImGui.SameLine();
-        if(ImGui.Button("Copy all"))
+        if (ImGui.Button("全部复制"))
         {
 #pragma warning disable
             GenericHelpers.Copy(Messages.Where(x => x.Level >= SelectedLevel).Select(x => $"[{x.Level}@{x.Time}] {x.Message}").Join("\n"));
 #pragma warning restore
         }
         ImGui.SameLine();
-        if(ImGui.Button("Clear"))
+        if(ImGui.Button("清除"))
         {
             Messages.Clear();
         }
         ImGui.SameLine();
         ImGuiEx.SetNextItemFullWidth(-30);
-        ImGui.InputTextWithHint("##Filter", "Filter...", ref Search, 100);
+        ImGui.InputTextWithHint("##Filter", "筛选...", ref Search, 100);
         ImGui.SameLine();
         if(ImGuiEx.IconButton(Dalamud.Interface.FontAwesomeIcon.Filter, "##LogFilter")) ImGui.OpenPopup("filter_window");
-        ImGuiEx.Tooltip("Log Filter");
+        ImGuiEx.Tooltip("日志筛选");
 
         if(ImGui.BeginPopup("filter_window", ImGuiWindowFlags.NoMove | ImGuiWindowFlags.Popup))
         {

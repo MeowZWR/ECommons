@@ -81,19 +81,19 @@ public static class PatreonBanner
     }
 
     private static string PatreonButtonTooltip => $"""
-				If you like {Svc.PluginInterface.Manifest.Name}, please consider supporting it's developer via Patreon or via other means! 
+				如果你喜欢 {Svc.PluginInterface.Manifest.Name}，请考虑通过 Patreon 或其他方式支持它的开发者！ 
 				
-				This will help me to update the plugin while granting you access to priority feature requests, priority support, early plugin builds, participation in votes for features and more.
+				这将帮助开发者更新插件，同时为你提供优先功能请求、优先支持、早期插件版本、参与功能投票等更多权益。
 
-				Left click - to go to Patreon;
-				Right click - see all options
+				左键点击 - 前往 Patreon；
+				右键点击 - 查看所有选项
 				""";
 
     private static string SmallPatreonButtonTooltip => $"""
-				If you like {Svc.PluginInterface.Manifest.Name}, please consider supporting it's developer via Patreon.
+				如果你喜欢 {Svc.PluginInterface.Manifest.Name}，请考虑通过 Patreon 支持它的开发者。
 
-				Left click - to go to Patreon;
-				Right click - see other options
+				左键点击 - 前往 Patreon；
+				右键点击 - 查看其他选项
 				""";
 
     private static void Popup()
@@ -113,7 +113,7 @@ public static class PatreonBanner
         }
         if(ImGui.BeginPopup("NXPS"))
         {
-            if(ImGui.Selectable("Subscribe on Patreon"))
+            if(ImGui.Selectable("在 Patreon 订阅"))
             {
                 GenericHelpers.ShellStart("https://subscribe.nightmarexiv.com");
             }
@@ -121,17 +121,17 @@ public static class PatreonBanner
             {
                 GenericHelpers.ShellStart("https://donate.nightmarexiv.com");
             }*/
-            if(ImGui.Selectable("Donate via Cryptocurrency"))
+            if(ImGui.Selectable("通过加密货币捐赠"))
             {
                 GenericHelpers.ShellStart($"https://crypto.nightmarexiv.com/{(IsOfficialPlugin() ? "?" + Svc.PluginInterface.Manifest.Name : "")}");
             }
             if(!IsOfficialPlugin())
             {
-                if(ImGui.Selectable("Join NightmareXIV Discord"))
+                if(ImGui.Selectable("加入 NightmareXIV Discord 服务器"))
                 {
                     GenericHelpers.ShellStart("https://discord.nightmarexiv.com");
                 }
-                if(ImGui.Selectable("Explore other NightmareXIV plugins"))
+                if(ImGui.Selectable("浏览 NightmareXIV 的其他插件"))
                 {
                     GenericHelpers.ShellStart("https://explore.nightmarexiv.com");
                 }
