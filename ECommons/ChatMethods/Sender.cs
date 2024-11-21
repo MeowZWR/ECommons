@@ -1,4 +1,10 @@
-﻿using System;
+﻿using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.Text.SeStringHandling;
+using ECommons.DalamudServices;
+using ECommons.ExcelServices;
+using Lumina.Excel;
+using Lumina.Excel.Sheets;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Dalamud.Game.ClientState.Objects.SubKinds;
@@ -12,12 +18,26 @@ using Lumina.Excel.GeneratedSheets;
 namespace ECommons.ChatMethods;
 #nullable disable
 
-[Obfuscation(Exclude = true, ApplyToMembers = true)]
 public struct Sender : IEquatable<Sender>
 {
-    public string Name;
+    [Obfuscation] public string Name;
+    [Obfuscation] public uint HomeWorld;
 
-    public uint HomeWorld;
+    public static bool TryParse(string nameWithWorld, out Sender s)
+    {
+        var split = nameWithWorld.Split('@');
+        if(split.Length == 2)
+        {
+            var world = ExcelWorldHelper.Get(split[1]);
+            if(world != null)
+            {
+                s = new(split[0], world.Value.RowId);
+                return true;
+            }
+        }
+        s = default;
+        return false;
+    }
 
     public static bool TryParse(string nameWithWorld, out Sender s)
     {
@@ -47,14 +67,14 @@ public struct Sender : IEquatable<Sender>
     {
     }
 
-    public Sender(SeString Name, Dalamud.Game.ClientState.Resolvers.ExcelResolver<World> HomeWorld)
-        : this(Name.ToString(), HomeWorld.Id)
+    public Sender(SeString Name, RowRef<World> HomeWorld)
     {
+        this = new(Name.ToString(), HomeWorld.RowId);
     }
 
-    public Sender(string Name, Dalamud.Game.ClientState.Resolvers.ExcelResolver<World> HomeWorld)
-        : this(Name, HomeWorld.Id)
+    public Sender(string Name, RowRef<World> HomeWorld)
     {
+        this = new(Name, HomeWorld.RowId);
     }
 
     public Sender(IPlayerCharacter pc)
@@ -86,10 +106,7 @@ public struct Sender : IEquatable<Sender>
     {
         foreach (IGameObject @object in Svc.Objects)
         {
-            if (@object is IPlayerCharacter playerCharacter && playerCharacter.Name.ToString() == Name && playerCharacter.HomeWorld.Id == HomeWorld)
-            {
-                return playerCharacter;
-            }
+            if(x is IPlayerCharacter pc && pc.Name.ToString() == Name && pc.HomeWorld.RowId == HomeWorld) return pc;
         }
 
         return null;
@@ -108,7 +125,7 @@ public struct Sender : IEquatable<Sender>
 
     public override string ToString()
     {
-        return $"{Name}@{Svc.Data.GetExcelSheet<World>()?.GetRow(HomeWorld)?.Name}";
+        return $"{Name}@{Svc.Data.GetExcelSheet<World>()?.GetRowOrDefault(HomeWorld)?.Name}";
     }
 
     public static bool operator ==(Sender left, Sender right)
