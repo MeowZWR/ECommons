@@ -1,37 +1,38 @@
 ﻿using Dalamud.Game;
-using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
-using Dalamud.Interface.Windowing;
 using Dalamud.Memory;
 using Dalamud.Utility;
 using ECommons.ChatMethods;
-using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.ExcelServices.Sheets;
-using ECommons.ImGuiMethods;
 using ECommons.Interop;
-using ECommons.Logging;
 using ECommons.MathHelpers;
 using ECommons.UIHelpers.AddonMasterImplementations;
 using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using ImGuiNET;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
+using Lumina.Extensions;
 using Lumina.Text.ReadOnly;
 using Newtonsoft.Json;
 using PInvoke;
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Runtime.CompilerServices;
+using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Interface.Windowing;
+using ECommons.DalamudServices;
+using ECommons.ImGuiMethods;
+using ECommons.Logging;
+using ImGuiNET;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 #nullable disable
@@ -40,6 +41,32 @@ namespace ECommons;
 
 public static unsafe partial class GenericHelpers
 {
+    private static string UidPrefix = $"{Random.Shared.Next(0, 0xFFFF):X4}";
+    private static ulong UidCnt = 0;
+    public static string GetTemporaryId() => $"{UidPrefix}{UidCnt++:X}";
+
+    public static bool TryGetValue<T>(this T? nullable, out T value) where T : struct
+    {
+        if(nullable.HasValue)
+        {
+            value = nullable.Value;
+            return true;
+        }
+        value = default;
+        return false;
+    }
+
+    public static bool TryGetValue<T>(this RowRef<T> rowRef, out T value) where T:struct, IExcelRow<T>
+    {
+        if(rowRef.ValueNullable != null)
+        {
+            value = rowRef.Value;
+            return true;
+        }
+        value = default;
+        return false;
+    }
+
     public static TExtension GetExtension<TExtension, TBase>(this TBase row) where TExtension : struct, IExcelRow<TExtension>, IRowExtension<TExtension, TBase> where TBase : struct, IExcelRow<TBase>
     {
         return TExtension.GetExtended(row);
@@ -191,8 +218,8 @@ public static unsafe partial class GenericHelpers
         return obj?.Address == other?.Address;
     }
 
-    /// <inheritdoc cref="SafeSelect{K, V}(IDictionary{K, V}, K, V)"/>
-    public static V? SafeSelect<K, V>(this IDictionary<K, V> dictionary, K? key) => SafeSelect(dictionary, key, default);
+    /// <inheritdoc cref="SafeSelect{K, V}(IReadOnlyDictionary{K, V}, K, V)"/>
+    public static V? SafeSelect<K, V>(this IReadOnlyDictionary<K, V> dictionary, K? key) => SafeSelect(dictionary, key, default);
 
     /// <summary>
     /// Safely selects a value from a <paramref name="dictionary"/>. Does not throws exceptions under any circumstances.
@@ -203,7 +230,7 @@ public static unsafe partial class GenericHelpers
     /// <param name="key"></param>
     /// <param name="defaultValue">Returns if <paramref name="dictionary"/> is <see langword="null"/> or <paramref name="key"/> is <see langword="null"/> or <paramref name="key"/> is not found in <paramref name="dictionary"/></param>
     /// <returns></returns>
-    public static V? SafeSelect<K, V>(this IDictionary<K, V> dictionary, K key, V defaultValue)
+    public static V? SafeSelect<K, V>(this IReadOnlyDictionary<K, V> dictionary, K key, V defaultValue)
     {
         if(dictionary == null) return default;
         if(key == null) return default;
@@ -225,7 +252,7 @@ public static unsafe partial class GenericHelpers
     /// <param name="list"></param>
     /// <param name="index"></param>
     /// <returns></returns>
-    public static T SafeSelect<T>(this IList<T> list, int index)
+    public static T SafeSelect<T>(this IReadOnlyList<T> list, int index)
     {
         if(list == null) return default;
         if(index < 0 || index >= list.Count) return default;
@@ -322,7 +349,7 @@ public static unsafe partial class GenericHelpers
     }
 
     [Obsolete($"Use {nameof(SafeSelect)}")]
-    public static T GetOrDefault<T>(this IList<T> List, int index) => SafeSelect(List, index);
+    public static T GetOrDefault<T>(this IReadOnlyList<T> List, int index) => SafeSelect(List, index);
 
     [Obsolete($"Use {nameof(SafeSelect)}")]
     public static T GetOrDefault<T>(this T[] Array, int index) => SafeSelect(Array, index);
@@ -911,39 +938,59 @@ public static unsafe partial class GenericHelpers
         var parent = node->ParentNode;
         return parent == null ? node : GetRootNode(parent);
     }
+    
+    /// <summary>
+    /// Removes whitespaces, line breaks, tabs, etc from string.
+    /// </summary>
+    /// <param name="s"></param>
+    /// <returns></returns>
+    public static string Cleanup(this string s)
+    {
+        StringBuilder sb = new(s.Length);
+        foreach(var c in s)
+        {
+            if(c == ' ' || c == '\n' || c == '\r' || c == '\t') continue;
+            sb.Append(c);
+        }
+        return sb.ToString();
+    }
 
+    [Obsolete("Dalamud has added their own ExtractText method for Lumina strings that is not compatible with ECommons. Therefore, extension method can not be used on Lumina strings anymore. For the consistency, ExtractText method is renamed to GetText.")]
+    public static string ExtractText(this ReadOnlySeString s, bool onlyFirst = false) => s.GetText(onlyFirst);
     /// <summary>
     /// Discards any non-text payloads from <see cref="SeString"/>
     /// </summary>
     /// <param name="s"></param>
     /// <param name="onlyFirst">Whether to find first text payload and only return it</param>
     /// <returns>String that only includes text payloads</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static string ExtractText(this ReadOnlySeString s, bool onlyFirst = false)
+    public static string GetText(this ReadOnlySeString s, bool onlyFirst = false)
     {
-        return s.ToDalamudString().ExtractText(onlyFirst);
+        return s.ToDalamudString().GetText(onlyFirst);
     }
 
+    [Obsolete("Dalamud has added their own ExtractText method for Lumina strings that is not compatible with ECommons. Therefore, extension method can not be used on Lumina strings anymore. For the consistency, ExtractText method is renamed to GetText.")]
+    public static string ExtractText(this Utf8String s, bool onlyFirst = false) => s.GetText(onlyFirst);
     /// <summary>
     /// Reads SeString from unmanaged memory and discards any non-text payloads from <see cref="SeString"/>
     /// </summary>
     /// <param name="s"></param>
     /// <param name="onlyFirst">Whether to find first text payload and only return it</param>
     /// <returns>String that only includes text payloads</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static string ExtractText(this Utf8String s, bool onlyFirst = false)
+    public static string GetText(this Utf8String s, bool onlyFirst = false)
     {
         var str = GenericHelpers.ReadSeString(&s);
-        return str.ExtractText(false);
+        return str.GetText(false);
     }
 
+    [Obsolete("Dalamud has added their own ExtractText method for Lumina strings that is not compatible with ECommons. Therefore, extension method can not be used on Lumina strings anymore. For the consistency, ExtractText method is renamed to GetText.")]
+    public static string ExtractText(this SeString seStr, bool onlyFirst = false) => seStr.GetText(onlyFirst);
     /// <summary>
     /// Discards any non-text payloads from <see cref="SeString"/>
     /// </summary>
     /// <param name="seStr"></param>
     /// <param name="onlyFirst">Whether to find first text payload and only return it</param>
     /// <returns>String that only includes text payloads</returns>
-    public static string ExtractText(this SeString seStr, bool onlyFirst = false)
+    public static string GetText(this SeString seStr, bool onlyFirst = false)
     {
         StringBuilder sb = new();
         foreach(var x in seStr.Payloads)
@@ -1119,37 +1166,34 @@ public static unsafe partial class GenericHelpers
         return ref i;
     }
 
-    public static void LogWarning(this Exception e)
+    public static string ToStringFull(this Exception e)
     {
-        PluginLog.Warning($"{e.Message}\n{e.StackTrace ?? ""}");
+        var str = new StringBuilder($"{e.Message}\n{e.StackTrace}");
+        var inner = e.InnerException;
+        for(var i = 1; inner != null; i++)
+        {
+            str.Append($"\nAn inner exception ({i}) was thrown: {e.Message}\n{e.StackTrace}");
+            inner = inner.InnerException;
+        }
+        return str.ToString();
     }
 
-    public static void Log(this Exception e)
+    public static void Log(this Exception e, Action<string> exceptionFunc)
     {
-        PluginLog.Error($"{e.Message}\n{e.StackTrace ?? ""}");
-    }
-    public static void LogVerbose(this Exception e)
-    {
-        PluginLog.LogVerbose($"{e.Message}\n{e.StackTrace ?? ""}");
-    }
-    public static void LogInternal(this Exception e)
-    {
-        InternalLog.Error($"{e.Message}\n{e.StackTrace ?? ""}");
-    }
-    public static void LogInfo(this Exception e)
-    {
-        PluginLog.Information($"{e.Message}\n{e.StackTrace ?? ""}");
+        exceptionFunc(e.ToStringFull());
     }
 
+    public static void LogWarning(this Exception e) => e.Log(PluginLog.Warning);
+    public static void Log(this Exception e) => e.Log(PluginLog.Error);
+    public static void LogVerbose(this Exception e) => e.Log(PluginLog.Verbose);
+    public static void LogInternal(this Exception e) => e.Log(InternalLog.Error);
+    public static void LogInfo(this Exception e) => e.Log(PluginLog.Information);
     public static void Log(this Exception e, string ErrorMessage)
     {
-        PluginLog.Error($"{ErrorMessage}\n{e.Message}\n{e.StackTrace ?? ""}");
+        PluginLog.Error($"{ErrorMessage}");
+        e.Log(PluginLog.Error);
     }
-
-    public static void LogDuo(this Exception e)
-    {
-        DuoLog.Error($"{e.Message}\n{e.StackTrace ?? ""}");
-    }
+    public static void LogDuo(this Exception e) => e.Log(DuoLog.Error);
 
     public static bool IsNoConditions()
     {
@@ -1620,7 +1664,7 @@ public static unsafe partial class GenericHelpers
             || (col.A == 0xFF && col.R == 0xEE && col.G == 0xE1 && col.B == 0xC5);
     }
 
-    public static void MoveItemToPosition<T>(List<T> list, Func<T, bool> sourceItemSelector, int targetedIndex)
+    public static void MoveItemToPosition<T>(IList<T> list, Func<T, bool> sourceItemSelector, int targetedIndex)
     {
         var sourceIndex = -1;
         for(var i = 0; i < list.Count; i++)
@@ -1669,7 +1713,6 @@ public static unsafe partial class GenericHelpers
     [Obsolete($"Use MemoryHelper.ReadRaw")]
     public static byte[] ReadRaw(IntPtr memoryAddress, int length) => MemoryHelper.ReadRaw(memoryAddress, length);
 
-
     public static ExcelSheet<T> GetSheet<T>(ClientLanguage? language = null) where T : struct, IExcelRow<T>
         => Svc.Data.GetExcelSheet<T>(language ?? Svc.ClientState.ClientLanguage);
 
@@ -1683,16 +1726,37 @@ public static unsafe partial class GenericHelpers
         => GetSheet<T>(language).GetRowOrDefault(rowId);
 
     public static T? GetRow<T>(uint rowId, ushort subRowId, ClientLanguage? language = null) where T : struct, IExcelSubrow<T>
-        => Svc.Data.GetSubrowExcelSheet<T>(language).GetSubrowOrDefault(rowId, subRowId);
+        => GetSubrowSheet<T>(language).GetSubrowOrDefault(rowId, subRowId);
+
+    public static SubrowCollection<T>? GetSubRow<T>(uint rowId, ClientLanguage? language = null) where T : struct, IExcelSubrow<T>
+        => GetSubrowSheet<T>(language).GetRowOrDefault(rowId);
 
     public static T? FindRow<T>(Func<T, bool> predicate) where T : struct, IExcelRow<T>
-         => GetSheet<T>().FirstOrDefault(predicate);
+         => GetSheet<T>().FirstOrNull(predicate);
 
     public static T? FindRow<T>(Func<T, bool> predicate, ClientLanguage? language = null) where T : struct, IExcelSubrow<T>
-        => GetSubrowSheet<T>(language).SelectMany(m => m).Cast<T?>().FirstOrDefault(t => predicate(t.Value));
+        => GetSubrowSheet<T>(language).SelectMany(m => m).Cast<T?>().FirstOrDefault(t => predicate(t.Value), null);
 
     public static T[] FindRows<T>(Func<T, bool> predicate) where T : struct, IExcelRow<T>
         => GetSheet<T>().Where(predicate).ToArray();
+
+    public static bool TryGetRow<T>(uint rowId, [NotNullWhen(returnValue: true)] out T row) where T : struct, IExcelRow<T>
+        => GetSheet<T>().TryGetRow(rowId, out row);
+
+    public static bool TryGetRow<T>(uint rowId, ClientLanguage? language, [NotNullWhen(returnValue: true)] out T row) where T : struct, IExcelRow<T>
+        => GetSheet<T>(language).TryGetRow(rowId, out row);
+
+    public static bool TryGetRow<T>(uint rowId, ushort subRowId, [NotNullWhen(returnValue: true)] out T row) where T : struct, IExcelSubrow<T>
+        => GetSubrowSheet<T>().TryGetSubrow(rowId, subRowId, out row);
+
+    public static bool TryGetRow<T>(uint rowId, ushort subRowId, ClientLanguage? language, [NotNullWhen(returnValue: true)] out T row) where T : struct, IExcelSubrow<T>
+        => GetSubrowSheet<T>(language).TryGetSubrow(rowId, subRowId, out row);
+
+    public static bool TryFindRow<T>(Predicate<T> predicate, out T row) where T : struct, IExcelRow<T>
+        => GetSheet<T>().TryGetFirst(predicate, out row);
+
+    public static bool TryFindRow<T>(Predicate<T> predicate, ClientLanguage? language, out T row) where T : struct, IExcelRow<T>
+        => GetSheet<T>(language).TryGetFirst(predicate, out row);
 
     public static IEnumerable<T> AllRows<T>(this SubrowExcelSheet<T> subrowSheet) where T:struct, IExcelSubrow<T>
     {
