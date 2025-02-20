@@ -1,4 +1,4 @@
-using Dalamud.Interface.Colors;
+﻿using Dalamud.Interface.Colors;
 using ECommons.CircularBuffers;
 using ECommons.ImGuiMethods;
 using ECommons.Reflection;
@@ -15,7 +15,7 @@ public class InternalLog
 {
     public static readonly CircularBuffer<InternalLogMessage> Messages = new(1000);
 
-    public static (string, Action, Vector4, bool) ImGuiTab(bool draw = true) => (draw ? "日志" : null, PrintImgui, ImGuiColors.DalamudGrey3, false);
+    public static (string, Action, Vector4, bool) ImGuiTab(bool draw = true) => (draw ? "日志记录" : null, PrintImgui, ImGuiColors.DalamudGrey3, false);
 
     public static void Information(string s)
     {
@@ -91,7 +91,7 @@ public class InternalLog
         ImGui.Checkbox("##Autoscroll", ref Autoscroll);
         ImGuiEx.Tooltip("自动滚动");
         ImGui.SameLine();
-        if (ImGui.Button("全部复制"))
+        if(ImGui.Button("全部复制"))
         {
 #pragma warning disable
             GenericHelpers.Copy(Messages.Where(x => x.Level >= SelectedLevel).Select(x => $"[{x.Level}@{x.Time}] {x.Message}").Join("\n"));
