@@ -76,7 +76,7 @@ public unsafe class TerritorySelector : Window
 
     private void Setup(HashSet<uint> SelectedTerritories, Action<TerritorySelector, HashSet<uint>> Callback, Action<TerritorySelector, uint> CallbackSingle)
     {
-        WindowName ??= "Select zones";
+        WindowName ??= "选择区域";
         IsSingleSelection = CallbackSingle != null;
         SelectedTerritory = SelectedTerritories.FirstOrDefault();
         if(Singleton)
@@ -88,7 +88,7 @@ public unsafe class TerritorySelector : Window
         {
             if(Selectors.Any(x => x.WindowName == WindowName))
             {
-                Notify.Error("Territory selector is already open");
+                Notify.Error("区域选择器已打开");
                 return;
             }
         }
@@ -158,15 +158,15 @@ public unsafe class TerritorySelector : Window
                 if(ImGuiEx.BeginTabItem(x.Key.ToString(), SelectedCategory == x.Key?ImGuiTabItemFlags.SetSelected:ImGuiTabItemFlags.None))
                 {
                     ImGui.SetNextItemWidth(200f);
-                    ImGui.InputTextWithHint($"##search", "Filter...", ref Filter, 50);
+                    ImGui.InputTextWithHint($"##search", "筛选...", ref Filter, 50);
                     ImGui.SameLine();
-                    ImGui.Checkbox("Only selected", ref OnlySelected);
+                    ImGui.Checkbox("仅显示已选择项", ref OnlySelected);
                     if(Player.Available)
                     {
                         ImGui.SameLine();
                         if(!IsSingleSelection)
                         {
-                            if(ImGuiEx.CollectionCheckbox($"Current: {ExcelTerritoryHelper.GetName(Svc.ClientState.TerritoryType)}", Svc.ClientState.TerritoryType, SelectedTerritories))
+                            if(ImGuiEx.CollectionCheckbox($"当前：{ExcelTerritoryHelper.GetName(Svc.ClientState.TerritoryType)}", Svc.ClientState.TerritoryType, SelectedTerritories))
                             {
                                 try
                                 {
@@ -178,19 +178,19 @@ public unsafe class TerritorySelector : Window
                                 }
                             }
                             ImGui.SameLine();
-                            if(ImGui.Button("Add all visible"))
+                            if(ImGui.Button("添加所有可见项"))
                             {
                                 VisibleAction = true;
                             }
                             ImGui.SameLine();
-                            if(ImGui.Button("Remove all visible"))
+                            if(ImGui.Button("移除所有可见项"))
                             {
                                 VisibleAction = false;
                             }
                         }
                         else
                         {
-                            if(ImGui.RadioButton($"Current zone: {ExcelTerritoryHelper.GetName(Svc.ClientState.TerritoryType)}", SelectedTerritory == Svc.ClientState.TerritoryType))
+                            if(ImGui.RadioButton($"当前区域：{ExcelTerritoryHelper.GetName(Svc.ClientState.TerritoryType)}", SelectedTerritory == Svc.ClientState.TerritoryType))
                             {
                                 SelectedTerritory = Svc.ClientState.TerritoryType;
                                 try
@@ -213,20 +213,20 @@ public unsafe class TerritorySelector : Window
                             if(ExtraColumns.Contains(Column.ID)) ImGui.TableSetupColumn("ID");
                             if(this.Mode == DisplayMode.PlaceNameDutyUnion)
                             {
-                                ImGui.TableSetupColumn("Place Name/Duty", ImGuiTableColumnFlags.WidthStretch);
+                                ImGui.TableSetupColumn("地名/任务", ImGuiTableColumnFlags.WidthStretch);
                             }
                             else if(this.Mode == DisplayMode.PlaceNameOnly)
                             {
-                                ImGui.TableSetupColumn("Place Name", ImGuiTableColumnFlags.WidthStretch);
+                                ImGui.TableSetupColumn("地名", ImGuiTableColumnFlags.WidthStretch);
                             }
                             else
                             {
-                                ImGui.TableSetupColumn("Place Name", ImGuiTableColumnFlags.WidthStretch);
-                                ImGui.TableSetupColumn("Duty");
+                                ImGui.TableSetupColumn("地名", ImGuiTableColumnFlags.WidthStretch);
+                                ImGui.TableSetupColumn("任务");
                             }
-                            if(ExtraColumns.Contains(Column.Zone)) ImGui.TableSetupColumn("Zone");
-                            if(ExtraColumns.Contains(Column.Region)) ImGui.TableSetupColumn("Region");
-                            if(ExtraColumns.Contains(Column.IntendedUse)) ImGui.TableSetupColumn("Intended use");
+                            if(ExtraColumns.Contains(Column.Zone)) ImGui.TableSetupColumn("地区");
+                            if(ExtraColumns.Contains(Column.Region)) ImGui.TableSetupColumn("地域");
+                            if(ExtraColumns.Contains(Column.IntendedUse)) ImGui.TableSetupColumn("预期用途");
 
                             ImGui.TableHeadersRow();
 
