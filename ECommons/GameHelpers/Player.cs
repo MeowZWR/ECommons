@@ -13,8 +13,8 @@ using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using Lumina.Excel.Sheets;
 using System.Numerics;
-using GrandCompany = ECommons.ExcelServices.GrandCompany;
 using Aetheryte = Lumina.Excel.Sheets.Aetheryte;
+using GrandCompany = ECommons.ExcelServices.GrandCompany;
 #nullable disable
 
 namespace ECommons.GameHelpers;
@@ -24,6 +24,7 @@ public static unsafe class Player
     public static readonly Number MaxLevel = 100;
     public static IPlayerCharacter Object => Svc.ClientState.LocalPlayer;
     public static bool Available => Svc.ClientState.LocalPlayer != null;
+    public static bool AvailableThreadSafe => GameObjectManager.Instance()->Objects.IndexSorted[0].Value != null;
     public static bool Interactable => Available && Object.IsTargetable;
     public static bool IsBusy => GenericHelpers.IsOccupied() || Object.IsCasting || IsMoving || IsAnimationLocked || Svc.Condition[ConditionFlag.InCombat];
     public static ulong CID => Svc.ClientState.LocalContentId;
@@ -38,7 +39,7 @@ public static unsafe class Player
     public static int UnsyncedLevel => GetUnsyncedLevel(GetJob(Object));
     public static int GetUnsyncedLevel(Job job) => PlayerState.Instance()->ClassJobLevels[Svc.Data.GetExcelSheet<ClassJob>().GetRowOrDefault((uint)job).Value.ExpArrayIndex];
 
-    public static bool IsInHomeWorld => !Player.Available?false:Svc.ClientState.LocalPlayer.HomeWorld.RowId == Svc.ClientState.LocalPlayer.CurrentWorld.RowId;
+    public static bool IsInHomeWorld => !Player.Available ? false : Svc.ClientState.LocalPlayer.HomeWorld.RowId == Svc.ClientState.LocalPlayer.CurrentWorld.RowId;
     public static bool IsInHomeDC => !Player.Available ? false : Svc.ClientState.LocalPlayer.CurrentWorld.Value.DataCenter.RowId == Svc.ClientState.LocalPlayer.HomeWorld.Value.DataCenter.RowId;
     public static string HomeWorld => Svc.ClientState.LocalPlayer?.HomeWorld.Value.Name.ToString();
     public static string CurrentWorld => Svc.ClientState.LocalPlayer?.CurrentWorld.Value.Name.ToString();
@@ -69,7 +70,7 @@ public static unsafe class Player
     public static float Rotation => Object.Rotation;
     public static float AnimationLock => *(float*)((nint)ActionManager.Instance() + 8);
     public static bool IsAnimationLocked => AnimationLock > 0;
-    public static bool IsMoving => AgentMap.Instance()->IsPlayerMoving == 1;
+    public static bool IsMoving => AgentMap.Instance()->IsPlayerMoving;
     public static bool IsDead => Svc.Condition[ConditionFlag.Unconscious];
     public static bool Revivable => IsDead && AgentRevive.Instance()->ReviveState != 0;
     public static bool Mounted => Svc.Condition[ConditionFlag.Mounted];
