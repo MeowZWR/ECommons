@@ -5,6 +5,7 @@ using ECommons.Configuration;
 using ECommons.DalamudServices;
 using ECommons.Events;
 using ECommons.EzContextMenu;
+using ECommons.EzDTR;
 using ECommons.EzEventManager;
 using ECommons.EzHookManager;
 using ECommons.EzIpcManager;
@@ -101,7 +102,10 @@ var type = "unknown build";
         GenericHelpers.Safe(DalamudReflector.Dispose);
         if(EzConfigGui.WindowSystem != null)
         {
-            Svc.PluginInterface.UiBuilder.OpenConfigUi -= EzConfigGui.Open;
+            if (EzConfigGui.Type is EzConfigGui.WindowType.Main or EzConfigGui.WindowType.Both)
+                Svc.PluginInterface.UiBuilder.OpenMainUi -= EzConfigGui.Open;
+            if (EzConfigGui.Type is EzConfigGui.WindowType.Config or EzConfigGui.WindowType.Both)
+                Svc.PluginInterface.UiBuilder.OpenConfigUi -= EzConfigGui.Open;
             Svc.PluginInterface.UiBuilder.Draw -= EzConfigGui.Draw;
             if(EzConfigGui.Config != null)
             {
@@ -142,8 +146,8 @@ var type = "unknown build";
         GenericHelpers.Safe(ContextMenuPrefixRemover.Dispose);
         GenericHelpers.Safe(Purgatory.Purge);
         GenericHelpers.Safe(ExternalWriter.Dispose);
+        GenericHelpers.Safe(EzDtr.DisposeAll);
         //SingletonManager.Dispose();
-        Chat.instance = null;
         Instance = null;
     }
 }
