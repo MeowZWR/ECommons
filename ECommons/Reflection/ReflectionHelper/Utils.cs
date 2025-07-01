@@ -1,3 +1,4 @@
+using ECommons.Logging;
 using ECommons.Reflection.FieldPropertyUnion;
 using System;
 using System.Collections.Generic;
@@ -197,6 +198,21 @@ public static partial class ReflectionHelper
         if(p != null)
         {
             return new UnionProperty(p);
+        }
+        return null;
+    }
+
+    public static Type GetTypeFromRuntimeAssembly(string assemblyName, string type)
+    {
+        try
+        {
+            var fType = Assembly.Load(assemblyName);
+            var t = fType.GetType(type);
+            return t;
+        }
+        catch(Exception e)
+        {
+            e.Log();
         }
         return null;
     }
