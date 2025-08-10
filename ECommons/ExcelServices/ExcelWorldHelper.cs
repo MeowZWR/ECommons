@@ -88,6 +88,7 @@ public static class ExcelWorldHelper
     {
         return Svc.Data.GetExcelSheet<World>().GetRowOrDefault(id);
     }
+    public static World? Get(int id) => Get((uint)id);
 
     [Obsolete("Please use GetName")]
     public static string GetWorldNameById(uint id) => GetName(id);

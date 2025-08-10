@@ -1,5 +1,5 @@
 ﻿using ECommons.ImGuiMethods;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Immutable;
@@ -54,7 +54,7 @@ public class ProxySettings
             ImGui.TableNextColumn();
             ImGuiEx.TextV($"Enable authentication:");
             ImGui.TableNextColumn();
-            ImGui.Checkbox("##enableProxyAuthentication", ref this.UseProxyAuthentication);
+            ImGui.Checkbox("##enableProxyAuthentication", ref UseProxyAuthentication);
 
             ImGui.TableNextRow();
             ImGui.TableNextColumn();

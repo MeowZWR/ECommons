@@ -16,7 +16,6 @@ using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using Lumina.Excel.Sheets;
 using Newtonsoft.Json;
-using PInvoke;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -34,6 +33,16 @@ public static unsafe partial class GenericHelpers
     private static string UidPrefix = $"{Random.Shared.Next(0, 0xFFFF):X4}";
     private static ulong UidCnt = 0;
     public static string GetTemporaryId() => $"{UidPrefix}{UidCnt++:X}";
+
+    public static string GetDisplayTag(this Guid guid)
+    {
+        return guid.ToString().Split("-")[0].ToUpper();
+    }
+
+    public static void Regenerate(this ref Guid guid)
+    {
+        guid = Guid.NewGuid();
+    }
 
     public static string RemoveWhitespaces(this string s)
     {
@@ -135,11 +144,11 @@ public static unsafe partial class GenericHelpers
         if(key == 0) return false;
         if(UseAsyncKeyCheck)
         {
-            return Bitmask.IsBitSet(User32.GetKeyState(key), 15);
+            return Bitmask.IsBitSet((uint)NativeFunctions.GetKeyState(key), 15);
         }
         else
         {
-            return Bitmask.IsBitSet(User32.GetAsyncKeyState(key), 15);
+            return Bitmask.IsBitSet((uint)NativeFunctions.GetAsyncKeyState(key), 15);
         }
     }
 
@@ -267,7 +276,7 @@ public static unsafe partial class GenericHelpers
                || Svc.Condition[ConditionFlag.CarryingItem]
                || Svc.Condition[ConditionFlag.CarryingObject]
                || Svc.Condition[ConditionFlag.BeingMoved]
-               || Svc.Condition[ConditionFlag.Mounted2]
+               || Svc.Condition[ConditionFlag.RidingPillion]
                || Svc.Condition[ConditionFlag.Mounting]
                || Svc.Condition[ConditionFlag.Mounting71]
                || Svc.Condition[ConditionFlag.ParticipatingInCustomMatch]
