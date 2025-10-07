@@ -32,6 +32,28 @@ public static unsafe partial class ImGuiEx
     public static readonly ImGuiTableFlags DefaultTableFlags = ImGuiTableFlags.NoSavedSettings | ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders | ImGuiTableFlags.SizingFixedFit;
     private static Dictionary<string, int> SelectedPages = [];
 
+    /// <summary>
+    /// Fully equals to <see cref="ImGui.DragFloat"/>.
+    /// </summary>
+    /// <param name="label"></param>
+    /// <param name="v"></param>
+    /// <param name="vSpeed"></param>
+    /// <param name="vMin"></param>
+    /// <param name="vMax"></param>
+    /// <param name="format"></param>
+    /// <param name="flags"></param>
+    /// <returns></returns>
+    public static bool DragDouble(ImU8String label, scoped ref double v, float vSpeed = 1.0f, float vMin = 0.0f, float vMax = 0.0f, ImU8String format = default, ImGuiSliderFlags flags = ImGuiSliderFlags.None)
+    {
+        var f = (float)v;
+        var ret = ImGui.DragFloat(label, ref f, vSpeed, vMin, vMax, format, flags);
+        if(ret)
+        {
+            v = f;
+        }
+        return ret;
+    }
+
     public static bool ArrowButton(string label, ImGuiDir direction)
     {
         if(label == "") label = "ECommonsDefaultID";
@@ -92,14 +114,14 @@ public static unsafe partial class ImGuiEx
         return ret;
     }
 
-    public static void DragDropRepopulate<T>(string identifier, T id, Action<T> callback) where T : unmanaged
+    public static void DragDropRepopulate<T>(string dragDropIdentifier, T data, Action<T> callback) where T : struct
     {
         ImGuiEx.Tooltip("Drag this selector to other selectors to set their values to the same");
         if(ImGui.BeginDragDropSource(ImGuiDragDropFlags.SourceNoPreviewTooltip))
         {
             try
             {
-                ImGuiDragDrop.SetDragDropPayload<T>(identifier, id);
+                ImGuiDragDrop.SetDragDropPayload<T>(dragDropIdentifier, data);
                 ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeAll);
             }
             catch(Exception e)
@@ -112,7 +134,7 @@ public static unsafe partial class ImGuiEx
         {
             try
             {
-                if(ImGuiDragDrop.AcceptDragDropPayload<T>(identifier, out var outId, ImGuiDragDropFlags.AcceptBeforeDelivery | ImGuiDragDropFlags.AcceptNoPreviewTooltip))
+                if(ImGuiDragDrop.AcceptDragDropPayload<T>(dragDropIdentifier, out var outId, ImGuiDragDropFlags.AcceptBeforeDelivery | ImGuiDragDropFlags.AcceptNoPreviewTooltip))
                 {
                     callback(outId);
                 }
