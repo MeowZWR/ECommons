@@ -299,6 +299,9 @@ public static unsafe partial class GenericHelpers
     public static TExtension GetExtension<TExtension, TBase>(this TBase row) where TExtension : struct, IExcelRow<TExtension>, IRowExtension<TExtension, TBase> where TBase : struct, IExcelRow<TBase>
         => TExtension.GetExtended(row);
 
+    /* Experimental extension syntax - currently commented out as it causes compilation errors
+     * This syntax is not standard C# and may be part of future language features
+     * 
     extension<T>(IExcelRow<T> sheet) where T : struct, IExcelRow<T>
     {
         /// <summary>
@@ -325,4 +328,5 @@ public static unsafe partial class GenericHelpers
             }
         }
     }
+    */
 }

@@ -68,21 +68,22 @@ public class ItemSelectorWindow : Window
     /// <summary>
     /// If you want, add, remove or completely override categories that are being displayed. Keep in mind that items that do not belong to any of these categories will not be displayed. If you want to get rid of category selector at all, clear it completely, then all items will be displayed. Set it to null to reset it to defaults. 
     /// </summary>
-    public OrderedDictionary<string, uint[]> CategoryGroups
+    public OrderedDictionary<string, uint[]>? CategoryGroups
     {
         get
         {
             if(field == null)
             {
-                field[DisplayCategory.Weapons.ToString()] = [.. ItemUICategory.Values.Where(x => x.OrderMajor == 1 || x.OrderMajor == 2 || x.RowId == 11).Select(x => x.RowId)];
-                field[DisplayCategory.Armor.ToString()] = [.. ItemUICategory.Values.Where(x => x.RowId != 11 && x.RowId != 62).Where(x => x.OrderMajor == 3 || x.OrderMajor == 4).Select(x => x.RowId)];
-                field[DisplayCategory.Consumable.ToString()] = [.. ItemUICategory.Values.Where(x => x.RowId.EqualsAny<uint>(44, 46, 33)).Select(x => x.RowId)];
-                field[DisplayCategory.Materials.ToString()] = [.. ItemUICategory.Values.Where(x => x.OrderMajor == 6 && x.RowId < 90).Select(x => x.RowId)];
-                field[DisplayCategory.Housing.ToString()] = [.. ItemUICategory.Values.Where(x => (x.OrderMajor == 6 && x.RowId > 90) || x.RowId.InRange(64, 80, true) || x.RowId.EqualsAny<uint>(95)).Select(x => x.RowId)];
-                field[DisplayCategory.Crystals.ToString()] = [.. ItemUICategory.Values.Where(x => x.OrderMajor == 59).Select(x => x.RowId)];
-                field[DisplayCategory.Special.ToString()] = [.. ItemUICategory.Values.Where(x => x.RowId.EqualsAny<uint>(100u, 39u, 112u)).Select(x => x.RowId)];
+                var itemUICategories = Svc.Data.GetExcelSheet<ItemUICategory>();
+                field[DisplayCategory.Weapons.ToString()] = [.. itemUICategories.Where(x => x.OrderMajor == 1 || x.OrderMajor == 2 || x.RowId == 11).Select(x => x.RowId)];
+                field[DisplayCategory.Armor.ToString()] = [.. itemUICategories.Where(x => x.RowId != 11 && x.RowId != 62).Where(x => x.OrderMajor == 3 || x.OrderMajor == 4).Select(x => x.RowId)];
+                field[DisplayCategory.Consumable.ToString()] = [.. itemUICategories.Where(x => x.RowId.EqualsAny<uint>(44, 46, 33)).Select(x => x.RowId)];
+                field[DisplayCategory.Materials.ToString()] = [.. itemUICategories.Where(x => x.OrderMajor == 6 && x.RowId < 90).Select(x => x.RowId)];
+                field[DisplayCategory.Housing.ToString()] = [.. itemUICategories.Where(x => (x.OrderMajor == 6 && x.RowId > 90) || x.RowId.InRange(64, 80, true) || x.RowId.EqualsAny<uint>(95)).Select(x => x.RowId)];
+                field[DisplayCategory.Crystals.ToString()] = [.. itemUICategories.Where(x => x.OrderMajor == 59).Select(x => x.RowId)];
+                field[DisplayCategory.Special.ToString()] = [.. itemUICategories.Where(x => x.RowId.EqualsAny<uint>(100u, 39u, 112u)).Select(x => x.RowId)];
                 var used = field.Values.SelectNested(x => x).ToHashSet();
-                field[DisplayCategory.Other.ToString()] = [.. ItemUICategory.Values.Where(x => !used.Contains(x.RowId)).Select(x => x.RowId)];
+                field[DisplayCategory.Other.ToString()] = [.. itemUICategories.Where(x => !used.Contains(x.RowId)).Select(x => x.RowId)];
             }
             return field;
         }
@@ -147,7 +148,7 @@ public class ItemSelectorWindow : Window
 
     public string SearchStr = "";
     public int MinILvl = 0;
-    public int MaxILvl = (int)Item.Values.Max(x => x.LevelItem.RowId);
+    public int MaxILvl = (int)Svc.Data.GetExcelSheet<Item>().Max(x => x.LevelItem.RowId);
     public bool? Tradeable = null;
     public bool? Marketable = null;
     public bool? Desynth = null;
@@ -205,7 +206,7 @@ public class ItemSelectorWindow : Window
             }
             catcnt++;
 
-            if(ThreadLoadImageHandler.TryGetIconTextureWrap(ItemUICategory.Get(catGroup.Value[0]).Icon, false, out var tex))
+            if(ThreadLoadImageHandler.TryGetIconTextureWrap(Svc.Data.GetExcelSheet<ItemUICategory>().GetRow(catGroup.Value[0]).Icon, false, out var tex))
             {
                 ImGui.Image(tex.Handle, new(ImGui.GetFrameHeight()));
                 ImGui.SameLine();
@@ -222,7 +223,7 @@ public class ItemSelectorWindow : Window
             {
                 foreach(var x in catGroup.Value)
                 {
-                    var data = ItemUICategory.Get(x);
+                    var data = Svc.Data.GetExcelSheet<ItemUICategory>().GetRow(x);
                     if(ThreadLoadImageHandler.TryGetIconTextureWrap(data.Icon, false, out var texv))
                     {
                         ImGui.Image(texv.Handle, new(ImGui.GetFrameHeight()));
@@ -280,7 +281,7 @@ public class ItemSelectorWindow : Window
     {
         this.ItemList.Clear();
         this.TextLen = 0f;
-        foreach(var x in Item.Values)
+        foreach(var x in Svc.Data.GetExcelSheet<Item>())
         {
             if(x.GetName() == "") continue;
             if(this.Categories.Count > 0 && !this.Categories.Contains(x.ItemUICategory.RowId)) continue;
