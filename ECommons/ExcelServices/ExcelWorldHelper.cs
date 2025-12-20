@@ -117,6 +117,7 @@ public static class ExcelWorldHelper
         NA = 2,
         EU = 3,
         OC = 4,
+        CN = 101,
     }
 
     public static Region GetRegion(this World world)
