@@ -115,25 +115,25 @@ public static class PatreonBanner
         {
             if(ImGui.Selectable("在 Patreon 订阅"))
             {
-                GenericHelpers.ShellStart("https://subscribe.nightmarexiv.com");
+                GenericHelpers.ShellStart("https://subscribe.nightmarexiv.org");
             }
             if(ImGui.Selectable("Donate one-time via Ko-Fi"))
             {
-                GenericHelpers.ShellStart("https://donate.nightmarexiv.com");
+                GenericHelpers.ShellStart("https://donate.nightmarexiv.org");
             }
             if(ImGui.Selectable("通过加密货币捐赠"))
             {
-                GenericHelpers.ShellStart($"https://crypto.nightmarexiv.com/{(IsOfficialPlugin() ? "?" + Svc.PluginInterface.Manifest.Name : "")}");
+                GenericHelpers.ShellStart($"https://crypto.nightmarexiv.org/{(IsOfficialPlugin() ? "?" + Svc.PluginInterface.Manifest.Name : "")}");
             }
             if(!IsOfficialPlugin())
             {
                 if(ImGui.Selectable("加入 NightmareXIV Discord 服务器"))
                 {
-                    GenericHelpers.ShellStart("https://discord.nightmarexiv.com");
+                    GenericHelpers.ShellStart("https://discord.nightmarexiv.org");
                 }
                 if(ImGui.Selectable("浏览 NightmareXIV 的其他插件"))
                 {
-                    GenericHelpers.ShellStart("https://explore.nightmarexiv.com");
+                    GenericHelpers.ShellStart("https://explore.nightmarexiv.org");
                 }
             }
             ImGui.EndPopup();
