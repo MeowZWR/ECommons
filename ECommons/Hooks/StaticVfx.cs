@@ -78,9 +78,9 @@ public static unsafe class StaticVfx
     /// </remarks>
     public delegate void StaticVfxRunCallbackDelegate(nint staticVfxAddress, float a1, uint a2);
 
-    private static Hook<VfxObject.Delegates.Create>? StaticVfxCreateHook;
+    private static Hook<VfxObjectCreateDelegate>? StaticVfxCreateHook;
 
-    private static Hook<VfxObject.Delegates.Update>? StaticVfxRunHook;
+    private static Hook<VfxObjectUpdateDelegate>? StaticVfxRunHook;
 
     private static Hook<VfxObject.Delegates.CleanupRender>? StaticVfxDtorHook;
 
@@ -231,7 +231,7 @@ public static unsafe class StaticVfx
             return;
         }
 
-        StaticVfxCreateHook = Svc.Hook.HookFromAddress<VfxObject.Delegates.Create>(VfxObject.Addresses.Create.Value, StaticVfxCreateDetour);
+        StaticVfxCreateHook = Svc.Hook.HookFromAddress<VfxObjectCreateDelegate>(VfxObject.Addresses.Create.Value, StaticVfxCreateDetour);
         StaticVfxCreateHook.Enable();
         PluginLog.Information("Requested Static Vfx Create hook and successfully initialized");
     }
@@ -243,7 +243,7 @@ public static unsafe class StaticVfx
             return;
         }
 
-        StaticVfxRunHook = Svc.Hook.HookFromAddress<VfxObject.Delegates.Update>(VfxObject.Addresses.Update.Value, StaticVfxRunDetour);
+        StaticVfxRunHook = Svc.Hook.HookFromAddress<VfxObjectUpdateDelegate>(VfxObject.Addresses.Update.Value, StaticVfxRunDetour);
         StaticVfxRunHook.Enable();
         PluginLog.Information("Requested Static Vfx Run hook and successfully initialized");
     }
@@ -377,4 +377,8 @@ public static unsafe class StaticVfx
             StaticVfxDtorHook = null;
         }
     }
+
+    private delegate VfxObject* VfxObjectCreateDelegate(CStringPointer a1, CStringPointer a2);
+
+    private delegate void VfxObjectUpdateDelegate(VfxObject* a1, float a2, int a3);
 }
