@@ -261,7 +261,7 @@ public static class DalamudReflector
             }
         }
 
-        if(!ignoreCache && pluginCache.TryGetValue(internalName, out var entry) && entry.Plugin != null)
+        if(!ignoreCache && pluginCache?.TryGetValue(internalName, out var entry) == true && entry.Plugin != null)
         {
             instance = entry.Plugin;
             context = entry.Context;
@@ -286,7 +286,7 @@ public static class DalamudReflector
                     {
                         instance = plugin;
                         context = t.GetFoP("loader")?.GetFoP<AssemblyLoadContext>("context");
-                        pluginCache[internalName] = new(plugin, context);
+                        pluginCache?[internalName] = new(plugin, context);
                         return true;
                     }
                 }
