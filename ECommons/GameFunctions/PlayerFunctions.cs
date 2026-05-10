@@ -14,7 +14,7 @@ public static unsafe class PlayerFunctions
     {
         for(var i = 1; i <= 8; i++)
         {
-            var optr = Framework.Instance()->GetUIModule()->GetPronounModule()->ResolvePlaceholder($"<{i}>", 0, 0);
+            var optr = Framework.Instance()->GetUIModule()->GetPronounModule()->ResolvePlaceholder($"<{i}>", 0, 0, false);
             if(verbose) PluginLog.Debug($"Placeholder {i} value {(optr == null ? "null" : optr->EntityId)}");
             if(pc.Address == (IntPtr)optr)
             {

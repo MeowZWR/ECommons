@@ -107,7 +107,7 @@ public static unsafe class ExtendedPronoun
             {
                 var cand = ResolveInternal(stripped);
                 if(cand != null) return cand;
-                return FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUIModule()->GetPronounModule()->ResolvePlaceholder($"{pronoun}", 0, 0);
+                return FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUIModule()->GetPronounModule()->ResolvePlaceholder($"{pronoun}", 0, 0, false);
             }
         }
         catch(Exception e)
