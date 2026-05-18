@@ -123,11 +123,11 @@ public partial class AddonMaster
             }
         }
 
-        public AtkComponentButton* CosmoPouchButton => Addon->GetComponentButtonById(26);
-        public AtkComponentButton* CosmoCraftingLogButton => Addon->GetComponentButtonById(27);
-        public AtkComponentButton* StellerReductionButton => Addon->GetComponentButtonById(28);
-        public AtkComponentButton* ReportResultsButton => Addon->GetComponentButtonById(29);
-        public AtkComponentButton* AbandonMissionButton => Addon->GetComponentButtonById(30);
+        public AtkComponentButton* CosmoPouchButton => Addon->GetComponentButtonById(34);
+        public AtkComponentButton* CosmoCraftingLogButton => Addon->GetComponentButtonById(35);
+        public AtkComponentButton* StellerReductionButton => Addon->GetComponentButtonById(36);
+        public AtkComponentButton* ReportResultsButton => Addon->GetComponentButtonById(37);
+        public AtkComponentButton* AbandonMissionButton => Addon->GetComponentButtonById(38);
 
         public void CosmoPouch() => ClickButtonIfEnabled(CosmoPouchButton);
         public void CosmoCraftingLog() => ClickButtonIfEnabled(CosmoCraftingLogButton);

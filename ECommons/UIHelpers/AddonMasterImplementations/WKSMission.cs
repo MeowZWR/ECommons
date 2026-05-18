@@ -110,7 +110,9 @@ public partial class AddonMaster
                 var ret = new List<ClassDropdown>();
                 for (int i = 0; i < NumClasses; i++)
                 {
-                    var jobSelect = new ClassDropdown(this, i);
+                    int value = Addon->AtkValues[13 + i].Int;
+
+                    var jobSelect = new ClassDropdown(this, value);
                     ret.Add(jobSelect);
                 }
 
