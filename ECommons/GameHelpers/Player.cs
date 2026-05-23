@@ -65,19 +65,19 @@ public static unsafe class Player
     public static RowRef<Tribe> Tribe => Lumina.Excel.Sheets.Tribe.GetRef(PlayerState.Instance()->Tribe);
     public static RowRef<World> HomeWorld => Object?.HomeWorld ?? default;
     public static RowRef<World> CurrentWorld => Object?.CurrentWorld ?? default;
-    public static RowRef<WorldDCGroupType> HomeDateCenter => HomeWorld.Value.DataCenter;
-    public static RowRef<WorldDCGroupType> CurrentDataCenter => CurrentWorld.Value.DataCenter;
+    public static RowRef<WorldDCGroupType> HomeDateCenter => HomeWorld.ValueNullable?.DataCenter ?? default;
+    public static RowRef<WorldDCGroupType> CurrentDataCenter => CurrentWorld.ValueNullable?.DataCenter ?? default;
     public static RowRef<TerritoryType> Territory => TerritoryType.GetRef(Svc.ClientState.TerritoryType);
-    public static RowRef<TerritoryIntendedUse> TerritoryIntendedUse => Territory.Value.TerritoryIntendedUse;
+    public static RowRef<TerritoryIntendedUse> TerritoryIntendedUse => Territory.ValueNullable?.TerritoryIntendedUse ?? default;
     public static RowRef<TerritoryType> HomeAetheryteTerritory => Aetheryte.GetRef(PlayerState.Instance()->HomeAetheryteId).Value.Territory;
     public static RowRef<ClassJob> ClassJob => Object?.ClassJob ?? default;
     public static RowRef<OnlineStatus> OnlineStatus => Object?.OnlineStatus ?? default;
     public static RowRef<ContentFinderCondition> ContentFinderCondition => Lumina.Excel.Sheets.ContentFinderCondition.GetRef(GameMain.Instance()->CurrentContentFinderConditionId);
 
-    public static string HomeWorldName => HomeWorld.Value.Name.ToString();
-    public static string CurrentWorldName => CurrentWorld.Value.Name.ToString();
-    public static string HomeDataCenterName => HomeWorld.Value.DataCenter.Value.Name.ToString();
-    public static string CurrentDataCenterName => CurrentWorld.Value.DataCenter.Value.Name.ToString();
+    public static string HomeWorldName => HomeWorld.ValueNullable?.Name.ToString();
+    public static string CurrentWorldName => CurrentWorld.ValueNullable?.Name.ToString();
+    public static string HomeDataCenterName => HomeWorld.ValueNullable?.DataCenter.ValueNullable?.Name.ToString();
+    public static string CurrentDataCenterName => CurrentWorld.ValueNullable?.DataCenter.ValueNullable?.Name.ToString();
     #endregion
 
     public static FFXIVClientStructs.FFXIV.Client.Enums.TerritoryIntendedUse CsTerritoryIntendedUseEnum => (FFXIVClientStructs.FFXIV.Client.Enums.TerritoryIntendedUse)TerritoryIntendedUse.RowId;
@@ -100,7 +100,7 @@ public static unsafe class Player
     public static bool Mounted => Svc.Condition[ConditionFlag.Mounted];
     public static bool Mounting => Svc.Condition[ConditionFlag.MountOrOrnamentTransition];
     /// <summary>Checks if the territory supports mounting, and if the player owns mounts</summary>
-    public static bool CanMount => Territory.Value.Mount && PlayerState.Instance()->NumOwnedMounts > 0;
+    public static bool CanMount => Territory.ValueNullable?.Mount == true && PlayerState.Instance()->NumOwnedMounts > 0;
     /// <summary>Checks if the player can fly at the given moment. Requires the player to be mounted and in a territory that supports flying.</summary>
     public static bool CanFly => Control.CanFly;
 

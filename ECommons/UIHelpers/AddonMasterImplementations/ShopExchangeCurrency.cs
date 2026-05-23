@@ -17,13 +17,13 @@ public partial class AddonMaster
         public ShopExchangeCurrency(nint addon) : base(addon) { }
         public ShopExchangeCurrency(void* addon) : base(addon) { }
 
-        public uint CurrencyAmount => Addon->AtkValues[84].UInt;
+        public uint CurrencyAmount => Addon->AtkValues[86].UInt;
         public uint NumEntries => Addon->AtkValues[4].UInt;
         public uint CurrencyId
         {
             get
             {
-                var iconId = Addon->AtkValues[85].UInt;
+                var iconId = Addon->AtkValues[87].UInt;
                 var row = Svc.Data.GetExcelSheet<Item>().Where(x => x.Icon == iconId).FirstOrDefault().RowId;
                 if (row != 0)
                 {
@@ -60,14 +60,14 @@ public partial class AddonMaster
                 var ret = new List<ShopItemInfo>();
                 for (int i = 0; i < NumEntries; i++)
                 {
-                    var itemId = Addon->AtkValues[1064 + (i * 1)].UInt;
+                    var itemId = Addon->AtkValues[1066 + (i * 1)].UInt;
 
                     if(itemId == 0)
                         continue;
                     else
                     {
-                        var costAmount = Addon->AtkValues[454 + (i * 1)].UInt;
-                        var index = Addon->AtkValues[1308 + (i * 1)].UInt;
+                        var costAmount = Addon->AtkValues[456 + (i * 1)].UInt;
+                        var index = Addon->AtkValues[1310 + (i * 1)].UInt;
                         var newEntry = new ShopItemInfo(this)
                         {
                             ItemId = itemId,

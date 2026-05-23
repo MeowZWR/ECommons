@@ -28,6 +28,10 @@ public struct EffectHeader
     /// <summary>
     /// Radians
     /// </summary>
+    public readonly float RealRotationD => (float)(((Rotation * 0.0095875263d) * 0.0099999998d) - Math.PI);
+    /// <summary>
+    /// Radians
+    /// </summary>
     public readonly float RotationFromNorth
     {
         get
