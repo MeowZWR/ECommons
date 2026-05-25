@@ -148,11 +148,6 @@ var type = "unknown build";
             if(!ReducedLogging) PluginLog.Information("Splatoon API module has been requested");
             GenericHelpers.Safe(Splatoon.Init);
         }
-        if(modules.ContainsAny(Module.All, Module.DisableRender))
-        {
-            if(!ReducedLogging) PluginLog.Information("Disable Render module has been requested");
-            GenericHelpers.Safe(RenderDisableManager.Init);
-        }
     }
 
     public static void CheckForObfuscation()

@@ -11,8 +11,12 @@ using System.Text;
 
 namespace ECommons.GameFunctions;
 
+/// <summary>
+/// RenderDisableManager provides cross-plugin synchronization 
+/// </summary>
 public unsafe static class RenderDisableManager
 {
+    private static bool Initialized = false;
     private static uint* FrameCounter;
     private static byte* RenderDisabled;
     private static HashSet<uint> RenderDisableRequests;
@@ -23,13 +27,14 @@ public unsafe static class RenderDisableManager
     private static readonly string Name_RenderDisableProcessingFramecount = $"ECommons.RenderDisableProcessingFramecount";
     private static readonly string Name_RenderDisableTakenIdentifiers = $"ECommons.RenderDisableTakenIdentifiers";
 
-    internal static void Init()
+    public static void Init()
     {
-        if(RenderDisabled != null)
+        if(Initialized)
         {
             PluginLog.Error("RenderDisableManager is already initialized and subsequent initialize call was ignored");
             return;
         }
+        Initialized = true;
         FrameCounter = &Framework.Instance()->FrameCounter;
         RenderDisabled = (byte*)(((nint)Manager.Instance()) + 230232);
         RenderDisableRequests = Svc.PluginInterface.GetOrCreateData<HashSet<uint>>(Name_RenderDisableRequests, () => []);
@@ -40,17 +45,29 @@ public unsafe static class RenderDisableManager
 
     public static void PlaceRequest()
     {
+        if(!Initialized) Init();
+        if(!Svc.Framework.IsInFrameworkUpdateThread)
+        {
+            PluginLog.Error($"{nameof(RenderDisableManager)}.{nameof(PlaceRequest)} can only be used in Framework Update thread.");
+            return;
+        }
         RenderDisableRequests.Add(ECommonsMain.InstanceUniqueId);
     }
 
     public static void RemoveRequest()
     {
+        if(!Initialized) return;
+        if(!Svc.Framework.IsInFrameworkUpdateThread)
+        {
+            PluginLog.Error($"{nameof(RenderDisableManager)}.{nameof(RemoveRequest)} can only be used in Framework Update thread.");
+            return;
+        }
         RenderDisableRequests.Remove(ECommonsMain.InstanceUniqueId);
     }
 
     internal static void Dispose()
     {
-        if(RenderDisabled != null)
+        if(Initialized)
         {
             RemoveRequest();
             Svc.Framework.Update -= Framework_Update;
