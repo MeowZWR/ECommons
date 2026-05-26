@@ -12,7 +12,12 @@ using System.Text;
 namespace ECommons.GameFunctions;
 
 /// <summary>
-/// RenderDisableManager provides cross-plugin synchronization 
+/// RenderDisableManager provides cross-plugin synchronization for disabling world rendering.
+/// <br></br>How to use:
+/// <br></br>- Call PlaceRequest to indicate that you wish to stop rendering from happening
+/// <br></br>- Call RemoveRequest to resume rendering
+/// <br></br>Rendering will be disabled for as long as any plugin has a request.
+/// <br></br>You do not to neither initialize nor dispose it manually, however you can call Init method to initialize it preemptively if you want.
 /// </summary>
 public unsafe static class RenderDisableManager
 {
@@ -21,12 +26,18 @@ public unsafe static class RenderDisableManager
     private static byte* RenderDisabled;
     private static HashSet<uint> RenderDisableRequests;
     private static uint[] RenderDisableProcessingFramecount;
+    /// <summary>
+    /// Set to true if you want to output verbose logs. It is advised to just have a checkbox rather than permanently setting it to true. 
+    /// </summary>
     public static bool Debug;
 
     private static readonly string Name_RenderDisableRequests = $"ECommons.RenderDisableRequests";
     private static readonly string Name_RenderDisableProcessingFramecount = $"ECommons.RenderDisableProcessingFramecount";
     private static readonly string Name_RenderDisableTakenIdentifiers = $"ECommons.RenderDisableTakenIdentifiers";
 
+    /// <summary>
+    /// Initializes RenderDisableManager. You do not need to call it manually. 
+    /// </summary>
     public static void Init()
     {
         if(Initialized)
@@ -43,6 +54,9 @@ public unsafe static class RenderDisableManager
         PluginLog.Information($"Initialized RenderDisableManager");
     }
 
+    /// <summary>
+    /// Places request indicating that your plugin wants to disable rendering. If not initialized, initializes RenderDisablerManager. Must only be called inside framework update thread. You can call it every frame, subsequent requests will not be piled up. 
+    /// </summary>
     public static void PlaceRequest()
     {
         if(!Initialized) Init();
@@ -54,6 +68,9 @@ public unsafe static class RenderDisableManager
         RenderDisableRequests.Add(ECommonsMain.InstanceUniqueId);
     }
 
+    /// <summary>
+    /// Places request indicating that your plugin no longer wants to disable rendering. If not initialized, does not initializes RenderDisablerManager. Must only be called inside framework update thread. You can call it every frame, subsequent requests when there are no requests from your plugin will not do anything. 
+    /// </summary>
     public static void RemoveRequest()
     {
         if(!Initialized) return;
@@ -69,14 +86,10 @@ public unsafe static class RenderDisableManager
     {
         if(Initialized)
         {
-            RemoveRequest();
+            Svc.Framework.RunOnFrameworkThread(() => RemoveRequest());
             Svc.Framework.Update -= Framework_Update;
-            RenderDisabled = null;
-            FrameCounter = null;
             Svc.PluginInterface.RelinquishData(Name_RenderDisableRequests);
             Svc.PluginInterface.RelinquishData(Name_RenderDisableProcessingFramecount);
-            RenderDisableRequests = null;
-            RenderDisableProcessingFramecount = null;
         }
     }
 
