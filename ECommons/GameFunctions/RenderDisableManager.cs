@@ -86,7 +86,11 @@ public unsafe static class RenderDisableManager
     {
         if(Initialized)
         {
-            Svc.Framework.RunOnFrameworkThread(() => RemoveRequest());
+            Svc.Framework.RunOnFrameworkThread(() =>
+            {
+                RemoveRequest();
+                Framework_Update(null);
+            });
             Svc.Framework.Update -= Framework_Update;
             Svc.PluginInterface.RelinquishData(Name_RenderDisableRequests);
             Svc.PluginInterface.RelinquishData(Name_RenderDisableProcessingFramecount);
