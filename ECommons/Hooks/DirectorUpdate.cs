@@ -11,7 +11,7 @@ public static class DirectorUpdate
 {
     private static readonly string Sig = "40 53 57 48 83 EC 58 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 41 8B F9";
 
-    public delegate nint ProcessDirectorUpdate(nint a1, uint a2, DirectorUpdateCategory a3, uint a4, uint a5, int a6, int a7, int a8, int a9);
+    public delegate void ProcessDirectorUpdate(nint a1, uint a2, DirectorUpdateCategory a3, uint a4, uint a5, int a6, int a7, int a8, int a9);
     internal static Hook<ProcessDirectorUpdate> ProcessDirectorUpdateHook = null;
     private static Action<nint, uint, DirectorUpdateCategory, uint, uint, int, int, int, int> FullParamsCallback = null;
     private static Action<DirectorUpdateCategory> CategoryOnlyCallback = null;
@@ -32,7 +32,7 @@ public static class DirectorUpdate
         }
     }
 
-    internal static nint ProcessDirectorUpdateDetour_Full(nint a1, uint a2, DirectorUpdateCategory a3, uint a4, uint a5, int a6, int a7, int a8, int a9)
+    internal static void ProcessDirectorUpdateDetour_Full(nint a1, uint a2, DirectorUpdateCategory a3, uint a4, uint a5, int a6, int a7, int a8, int a9)
     {
         try
         {
@@ -42,10 +42,10 @@ public static class DirectorUpdate
         {
             e.Log();
         }
-        return ProcessDirectorUpdateHook.Original(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+        ProcessDirectorUpdateHook.Original(a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
 
-    internal static nint ProcessDirectorUpdateDetour_Category(nint a1, uint a2, DirectorUpdateCategory a3, uint a4, uint a5, int a6, int a7, int a8, int a9)
+    internal static void ProcessDirectorUpdateDetour_Category(nint a1, uint a2, DirectorUpdateCategory a3, uint a4, uint a5, int a6, int a7, int a8, int a9)
     {
         try
         {
@@ -55,7 +55,7 @@ public static class DirectorUpdate
         {
             e.Log();
         }
-        return ProcessDirectorUpdateHook.Original(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+        ProcessDirectorUpdateHook.Original(a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
 
     public static void Init(Action<nint, uint, DirectorUpdateCategory, uint, uint, int, int, int, int> fullParamsCallback)
