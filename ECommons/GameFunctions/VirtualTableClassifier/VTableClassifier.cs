@@ -96,9 +96,9 @@ public static class VTableClassifier
 
     public static bool IsBattleChara(this IGameObject? obj, [NotNullWhen(true)]out IBattleChara? chr)
     {
-        if(obj.IsBattleChara())
+        if(obj.IsBattleChara() && obj is IBattleChara b)
         {
-            chr = (IBattleChara)obj;
+            chr = b;
             return true;
         }
         chr = default;
@@ -112,9 +112,9 @@ public static class VTableClassifier
 
     public static bool IsBattleNpc(this IGameObject? obj, [NotNullWhen(true)]out IBattleNpc? chr)
     {
-        if(obj.IsBattleNpc())
+        if(obj.IsBattleNpc() && obj is IBattleNpc b)
         {
-            chr = (IBattleNpc)obj;
+            chr = b;
             return true;
         }
         chr = default;
