@@ -259,12 +259,13 @@ public static class MathHelper
     }
 
     /// <summary>
-    /// 
+    /// Rotates point around origin by certain amount of degrees
     /// </summary>
     /// <param name="origin"></param>
     /// <param name="angle">Radians</param>
     /// <param name="p"></param>
     /// <returns></returns>
+    [OverloadResolutionPriority(1)]
     public static Vector3 RotateWorldPoint(Vector3 origin, float angle, Vector3 p)
     {
         if(angle == 0f) return p;
@@ -282,6 +283,33 @@ public static class MathHelper
         // translate point back:
         p.X = xnew + origin.X;
         p.Z = ynew + origin.Z;
+        return p;
+    }
+
+    /// <summary>
+    /// Rotates point around origin by certain amount of degrees
+    /// </summary>
+    /// <param name="origin"></param>
+    /// <param name="angle">Radians</param>
+    /// <param name="p"></param>
+    /// <returns></returns>
+    public static Vector2 RotateWorldPoint(Vector2 origin, float angle, Vector2 p)
+    {
+        if(angle == 0f) return p;
+        var s = (float)Math.Sin(angle);
+        var c = (float)Math.Cos(angle);
+
+        // translate point back to origin:
+        p.X -= origin.X;
+        p.Y -= origin.Y;
+
+        // rotate point
+        var xnew = p.X * c - p.Y * s;
+        var ynew = p.X * s + p.Y * c;
+
+        // translate point back:
+        p.X = xnew + origin.X;
+        p.Y = ynew + origin.Y;
         return p;
     }
 
