@@ -111,6 +111,19 @@ public static unsafe partial class ImGuiEx
     }
 
     /// <summary>
+    /// Puts simple text into table columns. Only to be used within a table.
+    /// </summary>
+    /// <param name="texts"></param>
+    public static void SimpleTableTextColumns(Action<string> action, params string[] texts)
+    {
+        foreach(var x in texts)
+        {
+            ImGui.TableNextColumn();
+            action(x ?? "");
+        }
+    }
+
+    /// <summary>
     /// Fully equals to <see cref="ImGui.DragFloat"/>.
     /// </summary>
     /// <param name="label"></param>

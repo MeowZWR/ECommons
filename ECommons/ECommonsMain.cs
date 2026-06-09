@@ -27,6 +27,7 @@ using ECommons.StringHelpers;
 using ECommons.Throttlers;
 using Serilog.Events;
 using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -40,8 +41,15 @@ namespace ECommons;
 
 public static class ECommonsMain
 {
-    public static object Instance = null;
+    public static object Instance { get; private set; } = null;
+    /// <summary>
+    /// Represents unique plugin identifier stored as UniqueId. It is guaranteed to be different for each plugin instance. 
+    /// </summary>
+    public static uint InstanceUniqueId { get; private set; }
+    private static ConcurrentDictionary<uint, string> UniqueIdConcurrentDictionary;
+    private static readonly string Name_UniqueIdConcurrentDictionary = "ECommons.UniqueIdConcurrentDictionary";
     public static bool Disposed { get; private set; } = false;
+    public static unsafe nint* MainWindowHandle { get; private set; }
 
     /// <summary>
     /// Set this to true to significantly reduce amount of logging ECommons will do. You can change it any time. 
@@ -80,6 +88,32 @@ public static class ECommonsMain
             }).Start();
             throw;
         }
+        try
+        {
+            UniqueIdConcurrentDictionary = Svc.PluginInterface.GetOrCreateData<ConcurrentDictionary<uint, string>>(Name_UniqueIdConcurrentDictionary, () => []);
+            do
+            {
+                byte[] buffer = new byte[4];
+                Random.Shared.NextBytes(buffer);
+                InstanceUniqueId = BitConverter.ToUInt32(buffer, 0);
+            }
+            while(!UniqueIdConcurrentDictionary.TryAdd(InstanceUniqueId, $"{Svc.PluginInterface.Manifest.InternalName} v{Svc.PluginInterface.Manifest.AssemblyVersion} @{Svc.PluginInterface.LoadTime}"));
+        }
+        catch(Exception e)
+        {
+            PluginLog.Error($"Error generating unique plugin identifier properly: \n{e.ToStringFull()}\nFallback: random number has been generated without uniqueness verification.");
+            byte[] buffer = new byte[4];
+            Random.Shared.NextBytes(buffer);
+            InstanceUniqueId = BitConverter.ToUInt32(buffer, 0);
+        }
+        try
+        {
+            MainWindowHandle = (nint*)Svc.SigScanner.GetStaticAddressFromSig("48 89 1D ?? ?? ?? ?? 48 8B CB FF 15");
+        }
+        catch(Exception e)
+        {
+            PluginLog.Warning($"Could not obtain main window handle pointer. \n{e.ToStringFull()}");
+        }
 #if DEBUG
 var type = "debug build";
 #elif RELEASE
@@ -87,7 +121,7 @@ var type = "debug build";
 #else
 var type = "unknown build";
 #endif
-        if(!ReducedLogging) PluginLog.Information($"This is ECommons v{typeof(ECommonsMain).Assembly.GetName().Version} ({type}) and {Svc.PluginInterface.InternalName} v{instance.GetType().Assembly.GetName().Version}. Hello!");
+        if(!ReducedLogging) PluginLog.Information($"This is ECommons v{typeof(ECommonsMain).Assembly.GetName().Version} ({type}) and {Svc.PluginInterface.InternalName} v{instance.GetType().Assembly.GetName().Version}. Plugin's Instance ID is 0x{InstanceUniqueId:X8}. Hello!");
         Svc.Log.MinimumLogLevel = LogEventLevel.Verbose;
         GenericHelpers.Safe(CmdManager.Init);
         if(modules.ContainsAny(Module.VfxTracking, Module.All))
@@ -186,10 +220,15 @@ var type = "unknown build";
         GenericHelpers.Safe(EzSharedData.Dispose);
         GenericHelpers.Safe(EzIPC.Dispose);
         GenericHelpers.Safe(ContextMenuPrefixRemover.Dispose);
-        GenericHelpers.Safe(Purgatory.Purge);
         GenericHelpers.Safe(ExternalWriter.Dispose);
         GenericHelpers.Safe(EzDtr.DisposeAll);
         GenericHelpers.Safe(TradeDetectionManager.Dispose);
+        GenericHelpers.Safe(RenderDisableManager.Dispose);
+        GenericHelpers.Safe(Purgatory.Purge);
+        GenericHelpers.Safe(static () =>
+        {
+            Svc.PluginInterface.RelinquishData(Name_UniqueIdConcurrentDictionary);
+        });
         //SingletonManager.Dispose();
         Instance = null;
     }
