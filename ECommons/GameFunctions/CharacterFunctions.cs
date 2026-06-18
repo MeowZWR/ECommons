@@ -11,6 +11,61 @@ namespace ECommons.GameFunctions;
 
 public static unsafe class CharacterFunctions
 {
+    public static bool HasStatus(this IBattleChara chr, uint id, float? lessThan = null, float? moreThan = null)
+    {
+        foreach(var x in chr.StatusList)
+        {
+            if(x.StatusId == id)
+            {
+                if(lessThan != null && x.RemainingTime > lessThan.Value) continue;
+                if(moreThan != null && x.RemainingTime < moreThan.Value) continue;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static bool HasStatus(this IBattleChara chr, uint id, out float time, float? lessThan = null, float? moreThan = null)
+    {
+        foreach(var x in chr.StatusList)
+        {
+            if(x.StatusId == id)
+            {
+                if(lessThan != null && x.RemainingTime > lessThan.Value) continue;
+                if(moreThan != null && x.RemainingTime < moreThan.Value) continue;
+                time = x.RemainingTime;
+                return true;
+            }
+        }
+        time = default;
+        return false;
+    }
+
+    public static bool HasStatus(this IBattleChara chr, IEnumerable<uint> id, float? lessThan = null, float? moreThan = null)
+    {
+        foreach(var x in id)
+        {
+            if(chr.HasStatus(x, lessThan, moreThan))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static bool HasStatus(this IBattleChara chr, IEnumerable<uint> id, out List<(uint ID, float Time)> foundStatus, float? lessThan = null, float? moreThan = null)
+    {
+        foundStatus = [];
+        foreach(var x in id)
+        {
+            if(chr.HasStatus(x, out var time, lessThan, moreThan))
+            {
+                foundStatus.Add((x, time));
+            }
+        }
+        return foundStatus.Count > 0;
+    }
+
     public static ushort GetVFXId(void* VfxData)
     {
         if(VfxData == null) return 0;
