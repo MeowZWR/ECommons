@@ -10,6 +10,13 @@ using System.Threading.Tasks;
 namespace ECommons;
 public static unsafe partial class GenericHelpers
 {
+    public static bool AddIfNotExist<T>(this ICollection<T> collection, T value)
+    {
+        if(collection.Contains(value)) return false;
+        collection.Add(value);
+        return true;
+    }
+
     [OverloadResolutionPriority(1)]
     public static bool IsNullOrEmpty<T>(this List<T> value)
     {
