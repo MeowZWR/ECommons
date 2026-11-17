@@ -12,6 +12,20 @@ namespace ECommons;
 
 public static unsafe partial class GenericHelpers
 {
+    public static T FirstOrAdd<T>(this IList<T> list, Func<T> generator = null)
+    {
+        if(list.Count > 0)
+        {
+            return list[0];
+        }
+        else
+        {
+            var newItem = generator != null ? generator() : Activator.CreateInstance<T>();
+            list.Add(newItem);
+            return newItem;
+        }
+    }
+
     public static bool TryGetValue<T>(this IList<T> collection, int index, out T result)
     {
         if(collection != null && (uint)index < (uint)collection.Count)
@@ -294,6 +308,13 @@ public static unsafe partial class GenericHelpers
         return key == null ? default : dictionary.TryGetValue(key, out var ret) ? ret : defaultValue;
     }
 
+    /// <inheritdoc cref="CircularSelect{T}(IList{T}, int)"/>
+    public static T CircularSelect<T>(this IList<T> list, int index)
+    {
+        if(list.Count == 0) return default;
+        return list[MathHelper.Mod(index, list.Count)];
+    }
+
     /// <summary>
     /// Selects an entry of the <paramref name="list"/> at a specified <paramref name="index"/>, wrapping around if index is out of range.
     /// </summary>
@@ -301,14 +322,9 @@ public static unsafe partial class GenericHelpers
     /// <param name="list"></param>
     /// <param name="index"></param>
     /// <returns></returns>
-    public static T CircularSelect<T>(this IList<T> list, int index)
-    {
-        return list[MathHelper.Mod(index, list.Count)];
-    }
-
-    /// <inheritdoc cref="CircularSelect{T}(IList{T}, int)"/>
     public static T CircularSelect<T>(this T[] list, int index)
     {
+        if(list.Length == 0) return default;
         return list[MathHelper.Mod(index, list.Length)];
     }
 
@@ -459,6 +475,27 @@ public static unsafe partial class GenericHelpers
     /// <param name="predicate"></param>
     /// <returns></returns>
     public static int IndexOf<T>(this IEnumerable<T> values, Predicate<T> predicate)
+    {
+        var ret = -1;
+        foreach(var v in values)
+        {
+            ret++;
+            if(predicate(v))
+            {
+                return ret;
+            }
+        }
+        return -1;
+    }
+
+    /// <summary>
+    /// Searches index of first element in a Span that matches the predicate.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="values"></param>
+    /// <param name="predicate"></param>
+    /// <returns></returns>
+    public static int IndexOf<T>(this Span<T> values, Predicate<T> predicate)
     {
         var ret = -1;
         foreach(var v in values)
